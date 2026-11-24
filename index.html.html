@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPH 2027 Move Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    body {
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="h-full bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased font-sans transition-colors duration-200">
+
+  <!-- TOAST NOTIFICATION BANNER -->
+  <div id="toast-banner" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-teal-500 text-white dark:text-slate-950 text-xs font-bold shadow-lg border border-slate-700 dark:border-teal-300 transition-all">
+    <span id="toast-message">Action saved</span>
+  </div>
+
+  <!-- STICKY TOP APP BAR -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-blue-950/95 dark:bg-slate-900/95 border-b border-blue-900 dark:border-slate-800 text-white shadow-sm">
+    <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <div class="flex items-center space-x-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-teal-400 flex items-center justify-center text-slate-950 font-black text-sm shadow-sm ring-2 ring-teal-300/30 shrink-0">
+          SPH
+        </div>
+        <div class="truncate">
+          <div class="flex items-center space-x-1.5">
+            <h1 class="text-base font-extrabold tracking-tight leading-tight truncate">SPH 2027 Move</h1>
+            <span class="text-[10px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded-md font-bold border border-teal-500/30 shrink-0">
+              FEB '27
+            </span>
+          </div>
+          <p class="text-[11px] text-blue-200/80 leading-tight truncate">1025 Station St • False Creek Flats (6 km)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2 shrink-0">
+        <button
+          id="btn-theme-toggle"
+          type="button"
+          class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-teal-300"
+          aria-label="Toggle Night Shift Dark Mode"
+          title="Toggle Dark Mode"
+        >
+          <i id="icon-theme" data-lucide="moon" class="w-4 h-4"></i>
+        </button>
+
+        <button
+          id="btn-role-drawer"
+          type="button"
+          class="px-3 py-2.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 text-xs font-extrabold flex items-center space-x-1.5 active:scale-95 transition-all shadow-sm"
+        >
+          <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+          <span id="label-selected-role" class="max-w-[85px] truncate">All Roles</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STICKY SEARCH BAR -->
+    <div class="max-w-lg mx-auto px-4 pb-3">
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+        <input
+          id="input-search"
+          type="text"
+          placeholder="Search 200 FAQs (e.g. Call Room, RTLS, Hybrid OR, ICU)..."
+          class="w-full pl-10 pr-10 py-2.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-800/95 text-slate-900 dark:text-white placeholder-slate-400 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400 shadow-inner transition-all"
+        />
+        <button
+          id="btn-clear-search"
+          type="button"
+          class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1.5 rounded-lg"
+          aria-label="Clear search"
+        >
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- SLIDE-DOWN ROLE FILTER DRAWER -->
+    <div id="role-drawer" class="hidden border-t border-blue-800 dark:border-slate-800 bg-blue-900 dark:bg-slate-900 text-white p-4 max-w-lg mx-auto">
+      <div class="flex items-center justify-between mb-2.5">
+        <span class="text-[11px] font-bold text-teal-300 uppercase tracking-wider">Filter 200 FAQs by Medical Role</span>
+        <button id="btn-close-drawer" type="button" class="text-slate-300 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="role-buttons-grid" class="grid grid-cols-2 gap-2">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN SCROLLABLE CONTENT -->
+  <main class="max-w-lg mx-auto px-4 pt-4 pb-24 w-full space-y-4">
+
+    <!-- LIVE COUNTDOWN CARD -->
+    <section class="p-3.5 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-2">
+      <div class="flex items-center space-x-3">
+        <div class="p-2.5 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 shrink-0">
+          <i data-lucide="clock" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Feb 15, 2027 Go-Live</span>
+          <div id="countdown-display" class="text-xs sm:text-sm font-black text-teal-600 dark:text-teal-400 tabular-nums">
+            Calculating...
+          </div>
+        </div>
+      </div>
+      <div class="text-right shrink-0">
+        <span id="badge-match-count" class="text-[11px] font-extrabold bg-teal-500/10 text-teal-700 dark:text-teal-300 px-2.5 py-1 rounded-full border border-teal-500/20">
+          200 / 200 FAQs
+        </span>
+      </div>
+    </section>
+
+    <!-- VIEW 1: FAQS & SEARCH -->
+    <section id="view-faqs" class="space-y-3">
+      <!-- Horizontal Category Pills -->
+      <div id="category-pills-bar" class="overflow-x-auto no-scrollbar flex items-center space-x-2 py-1 -mx-4 px-4">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Active Category Summary Banner -->
+      <div id="category-banner" class="p-3.5 rounded-2xl border bg-blue-50/80 dark:bg-slate-900/80 border-blue-100 dark:border-slate-800">
+        <h2 id="category-banner-title" class="font-extrabold text-sm text-blue-950 dark:text-white"></h2>
+        <p id="category-banner-desc" class="text-xs text-slate-600 dark:text-slate-400 mt-0.5"></p>
+      </div>
+
+      <!-- Active Search Status Bar -->
+      <div id="search-status-bar" class="hidden flex items-center justify-between text-xs px-1">
+        <span id="search-status-text" class="text-slate-500 dark:text-slate-400"></span>
+        <button id="btn-reset-search-inline" type="button" class="text-teal-600 dark:text-teal-400 font-bold hover:underline">
+          Clear Search
+        </button>
+      </div>
+
+      <!-- FAQ Accordion Cards Container -->
+      <div id="faq-list-container" class="space-y-2.5">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: MOVE READINESS CHECKLIST -->
+    <section id="view-checklist" class="hidden space-y-4">
+      <div class="p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Move Readiness Checklist</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Tap tasks below to track your February 2027 readiness</p>
+          </div>
+          <div class="text-right">
+            <span id="checklist-percent" class="text-lg font-black text-teal-600 dark:text-teal-400">0%</span>
+            <span class="block text-[9px] uppercase font-bold text-slate-400">Complete</span>
+          </div>
+        </div>
+        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+          <div id="checklist-progress-bar" class="bg-teal-500 h-full transition-all duration-300 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div id="checklist-items-container" class="space-y-2.5">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: SAVED BOOKMARKS -->
+    <section id="view-saved" class="hidden space-y-3">
+      <div class="p-3.5 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="bookmark" class="w-4 h-4 text-amber-500 fill-amber-500"></i>
+          <h2 id="saved-header-title" class="text-xs font-extrabold">Saved Bookmarks (0)</h2>
+        </div>
+        <button id="btn-clear-bookmarks" type="button" class="text-xs text-rose-500 font-bold hover:underline px-2 py-1 rounded-lg">
+          Clear All
+        </button>
+      </div>
+
+      <div id="saved-list-container" class="space-y-2.5">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- VIEW 4: STAFF TOOLS (COMMUTE CALCULATOR & ISSUE LOGGER) -->
+    <section id="view-tools" class="hidden space-y-4">
+      <!-- 6 km Commute & Transit Estimator -->
+      <div class="p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+        <div class="flex items-center space-x-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+          <i data-lucide="map-pin" class="w-4 h-4 text-teal-500"></i>
+          <h2 class="text-xs font-extrabold uppercase tracking-wider">6 km Commute & Transit Estimator</h2>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="commute-mode-buttons">
+          <button type="button" data-mode="skytrain" class="commute-btn p-2.5 rounded-xl border text-center transition-all flex flex-col items-center space-y-1 bg-teal-400 text-slate-950 font-bold border-teal-400">
+            <i data-lucide="train" class="w-4 h-4"></i>
+            <span class="text-[11px]">SkyTrain</span>
+          </button>
+          <button type="button" data-mode="driving" class="commute-btn p-2.5 rounded-xl border text-center transition-all flex flex-col items-center space-y-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent">
+            <i data-lucide="car" class="w-4 h-4"></i>
+            <span class="text-[11px]">Driving</span>
+          </button>
+          <button type="button" data-mode="cycling" class="commute-btn p-2.5 rounded-xl border text-center transition-all flex flex-col items-center space-y-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent">
+            <i data-lucide="bike" class="w-4 h-4"></i>
+            <span class="text-[11px]">Cycling</span>
+          </button>
+          <button type="button" data-mode="shuttle" class="commute-btn p-2.5 rounded-xl border text-center transition-all flex flex-col items-center space-y-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent">
+            <i data-lucide="bus" class="w-4 h-4"></i>
+            <span class="text-[11px]">90d Shuttle</span>
+          </button>
+        </div>
+
+        <div id="commute-details-box" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Operational Readiness Issue Logger -->
+      <div class="p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+        <div class="flex items-center space-x-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+          <i data-lucide="message-square" class="w-4 h-4 text-teal-500"></i>
+          <h2 class="text-xs font-extrabold uppercase tracking-wider">Operational Readiness Issue Logger</h2>
+        </div>
+
+        <form id="form-issue-logger" class="space-y-3">
+          <div>
+            <label for="select-issue-category" class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Issue Category</label>
+            <select
+              id="select-issue-category"
+              class="w-full p-2.5 rounded-xl text-xs font-medium border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            >
+              <option value="Wayfinding / Signage">Wayfinding / Signage</option>
+              <option value="Equipment / Medical Devices">Equipment / Medical Devices</option>
+              <option value="RTLS / Smart Alerts">RTLS / Smart Alerts</option>
+              <option value="Call Rooms / Lounges">Call Rooms / Lounges</option>
+              <option value="Clinical Unit Layout">Clinical Unit Layout</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="input-issue-unit" class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Unit / Floor / Tower (Optional)</label>
+            <input
+              id="input-issue-unit"
+              type="text"
+              placeholder="e.g., Level 5 ICU, Hybrid OR 2, ED Pod B..."
+              class="w-full p-2.5 rounded-xl text-xs border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            />
+          </div>
+
+          <div>
+            <label for="textarea-issue-desc" class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Observation / Discrepancy</label>
+            <textarea
+              id="textarea-issue-desc"
+              rows="3"
+              required
+              placeholder="Log missing RTLS tags, badge door access, sightlines, or workflow bottlenecks..."
+              class="w-full p-2.5 rounded-xl text-xs border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full py-3 bg-teal-400 hover:bg-teal-300 text-slate-950 rounded-xl text-xs font-extrabold active:scale-95 transition-all shadow-sm"
+          >
+            Submit Discrepancy to TOC (Ext. 72027)
+          </button>
+        </form>
+
+        <div id="logged-issues-list" class="space-y-2 pt-2">
+          <!-- Recent local submissions rendered here -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MOBILE BOTTOM NAVIGATION BAR -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-lg bg-white/95 dark:bg-slate-900/95 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
+    <div class="max-w-lg mx-auto grid grid-cols-5 px-1 py-1.5">
+      <button type="button" data-nav="browse" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 text-teal-600 dark:text-teal-400 font-bold transition-all">
+        <i data-lucide="layers" class="w-5 h-5"></i>
+        <span class="text-[10px] mt-0.5">Browse 200</span>
+      </button>
+
+      <button type="button" data-nav="search" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 hover:text-slate-900 dark:hover:text-white transition-all">
+        <i data-lucide="search" class="w-5 h-5"></i>
+        <span class="text-[10px] mt-0.5">Search</span>
+      </button>
+
+      <button type="button" data-nav="checklist" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 relative hover:text-slate-900 dark:hover:text-white transition-all">
+        <i data-lucide="check-square" class="w-5 h-5"></i>
+        <span class="text-[10px] mt-0.5">Checklist</span>
+        <span id="nav-checklist-dot" class="absolute top-1.5 right-4 w-2 h-2 bg-teal-400 rounded-full"></span>
+      </button>
+
+      <button type="button" data-nav="saved" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 relative hover:text-slate-900 dark:hover:text-white transition-all">
+        <i data-lucide="bookmark" class="w-5 h-5"></i>
+        <span class="text-[10px] mt-0.5">Saved</span>
+        <span id="nav-saved-badge" class="absolute top-1 right-3.5 bg-amber-500 text-slate-950 font-black text-[9px] min-w-[15px] h-[15px] px-1 rounded-full flex items-center justify-center">
+          6
+        </span>
+      </button>
+
+      <button type="button" data-nav="tools" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 hover:text-slate-900 dark:hover:text-white transition-all">
+        <i data-lucide="compass" class="w-5 h-5"></i>
+        <span class="text-[10px] mt-0.5">Tools</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- VANILLA JAVASCRIPT APPLICATION LOGIC & 200 FAQ DATABASE -->
+  <script>
+    // =========================================================================
+    // 1. COMPLETE 200 FAQS DATABASE (10 CATEGORIES x 20 FAQS)
+    // =========================================================================
+    const FAQ_DATA = [
+      {
+        id: 'cat1',
+        category: '1. Timeline & Move Logistics',
+        shortTitle: 'Timeline',
+        description: 'Go-Live dates, 6 km Green Corridor transport, ED transition, and TOC protocols.',
+        faqs: [
+          {
+            id: 1,
+            question: 'What is the exact sequence of events leading up to the February 2027 move?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: '• Late 2026: Substantial physical completion, equipment installation, and IT infrastructure burn-in.\n• Nov 2026 – Jan 2027: Mandatory spatial orientation, unit-level simulation, and Day-in-the-Life (DITL) drills.\n• Early Feb 2027: Elective service ramp-down and legacy Burrard St acute census reduction.\n• Mid-to-Late Feb 2027: Executed single-day acute inpatient transfer and official Go-Live at 1025 Station St.'
+          },
+          {
+            id: 2,
+            question: 'How will acute inpatients be safely transported 6 km across Vancouver?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'Patient relocation occurs over a controlled single-day operational window with BCEHS and municipal traffic authorities. A dedicated "Green Corridor" with traffic signal priority links Burrard St and 1025 Station St. Each high-acuity patient travels with a dedicated clinical escort team (attending/fellow, critical care RN, and RT).'
+          },
+          {
+            id: 3,
+            question: 'How does the Emergency Department transition between the two campuses?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'Both EDs operate in parallel during a scheduled overlap window. At 06:00 AM on Move Day, ambulance diversions and walk-in signage switch to 1025 Station St while legacy ED teams stabilize, discharge, or transfer remaining patients.'
+          },
+          {
+            id: 4,
+            question: 'When will elective surgeries and routine procedures ramp down before Move Day?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'Elective OR cases, routine endoscopy, and non-urgent outpatient clinics ramp down 10–14 days prior to Move Day to lower acute inpatient census. Emergency trauma, urgent cardiac/EP, and life-saving surgical lines remain 100% active.'
+          },
+          {
+            id: 5,
+            question: 'Will any physician, resident, or nurse be asked to cover both sites on Move Day?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'No. Master rotations and on-call schedules strictly assign staff to either the Legacy Send Team or the New Site Receiving Team. Cross-site travel by active clinical providers during shift hours is prohibited.'
+          },
+          {
+            id: 6,
+            question: 'How is double-coverage structured for on-call physicians during Move Week?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Pre-budgeted double attending and resident call coverage is funded for ICU, Cardiology/EP, Cardiac Surgery, Anesthesia, Trauma, and Obstetrics across Move Week to manage simultaneous site operations.'
+          },
+          {
+            id: 7,
+            question: 'What happens to long-stay and alternate-level-of-care (ALC) patients prior to the move?',
+            roles: ['Physicians', 'Nursing', 'Allied Health'],
+            answer: 'Starting 30 days pre-move, multidisciplinary discharge teams prioritize transitioning stable long-stay and ALC patients to sub-acute, rehab, or community facilities to minimize the Move Day inpatient cohort.'
+          },
+          {
+            id: 8,
+            question: 'How do electronic health records (EHR) and active MARs transfer during transit?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The EHR operates on a unified database with zero downtime. Scanning a patient’s wristband upon departure logs "In-Transit" status; scanning upon arrival at 1025 Station St dynamically binds active orders and telemetry to the new bed.'
+          },
+          {
+            id: 9,
+            question: 'What is the contingency plan if February snow or severe weather hits on Move Day?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'City of Vancouver engineering has designated the 6 km Green Corridor as Priority-1 snow/ice clearance. Heated ambulance bays at both sites and 4WD critical care transport units are integrated into the Move Day fleet.'
+          },
+          {
+            id: 10,
+            question: 'Who holds authority to delay a critically unstable patient’s transfer on Move Day?',
+            roles: ['Physicians', 'Nursing'],
+            answer: 'A bedside Transfer Clearance Panel (attending physician, ICU medical director, and Transport Lead) evaluates unstable patients at 05:30 AM. Patients deemed unsafe to move remain in a stabilized legacy holding pod until cleared.'
+          },
+          {
+            id: 11,
+            question: 'How are medicolegal handoffs documented between sending and receiving teams?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'A standardized electronic SBAR Transport Handoff Note is mandatory prior to ambulance loading, followed by a warm verbal/digital sign-out upon arrival at the receiving unit.'
+          },
+          {
+            id: 12,
+            question: 'What is the Transition Operations Center (TOC) and how do I reach it?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The TOC is the 24/7 clinical and logistical command hub active for 30 days post-move. Staff can reach the TOC via single-touch speed dial on clinical smartphones or extension 72027.'
+          },
+          {
+            id: 13,
+            question: 'How will blood bank products and massive transfusion protocols operate during the move?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Fully stocked Transfusion Medicine labs operate concurrently at both sites during the 24-hour move window, with dedicated courier shuttles transferring cross-matched units alongside patients.'
+          },
+          {
+            id: 14,
+            question: 'What happens to inpatient dialysis treatments scheduled on Move Day?',
+            roles: ['Physicians', 'Nursing'],
+            answer: 'Renal teams adjust chronic inpatient hemodialysis schedules to the day before or after Move Day, while acute bedside CRRT machines accompany ICU patients in specialized transport ambulances.'
+          },
+          {
+            id: 15,
+            question: 'How are pharmacy narcotics and controlled substances transferred securely?',
+            roles: ['Physicians', 'Nursing', 'Allied Health'],
+            answer: 'Automated dispensing cabinets at the new hospital are pre-stocked 72 hours prior under dual-pharmacist and security audit. Legacy narcotics undergo witnessed reconciliation and armored transport post-closure.'
+          },
+          {
+            id: 16,
+            question: 'Will outpatient clinics close during the week of the inpatient move?',
+            roles: ['Physicians', 'Nursing', 'Allied Health'],
+            answer: 'In-person outpatient clinics pause for 5 business days around Move Day, shifting urgent follow-ups to virtual telehealth visits before resuming full in-person schedules at the new campus.'
+          },
+          {
+            id: 17,
+            question: 'How are families notified of their loved one’s exact departure and arrival times?',
+            roles: ['Nursing', 'Physicians', 'Allied Health'],
+            answer: 'Automated SMS notifications and dedicated Family Liaison navigators update designated contacts when a patient departs Burrard St and when they are settled into their new single-occupancy room.'
+          },
+          {
+            id: 18,
+            question: 'What happens to the legacy Burrard Street hospital once the last patient leaves?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Following a 24-hour clinical sweep and terminal decommissioning of medical gases and IT networks, acute clinical operations permanently cease at Burrard St and transition to site custodianship.'
+          },
+          {
+            id: 19,
+            question: 'How are urgent inter-facility transfers from regional hospitals routed on Move Day?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Provincial Patient Transfer Network (PTN) dispatchers automatically route all regional STEMI, aortic dissection, and tertiary referrals directly to 1025 Station St starting at 06:00 AM on Move Day.'
+          },
+          {
+            id: 20,
+            question: 'Where can medical staff view live bed census and move progress on Move Day?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'A live Move Day Telemetry & Census Dashboard is accessible on all clinical workstations and staff smartphones, displaying real-time ambulance transit counts and unit bed readiness.'
+          }
+        ]
+      },
+      {
+        id: 'cat2',
+        category: '2. Commute & Parking',
+        shortTitle: 'Commute',
+        description: 'Main St SkyTrain access, 90-day staff shuttle, underground parkade, and bike facilities.',
+        faqs: [
+          {
+            id: 21,
+            question: 'Where is the new hospital located and how far is it from the old site?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The new campus sits at 1025 Station Street in False Creek Flats (bounded by Station St, Prior St, National Ave, and Trillium Park), approximately 6 km east of the legacy Burrard St site.'
+          },
+          {
+            id: 22,
+            question: 'How close is the nearest SkyTrain station to the staff entrance?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Main Street–Science World Station (Expo Line) is 400 meters (a flat 4-minute walk) from the dedicated staff entrance, offering rapid transit connections across Metro Vancouver.'
+          },
+          {
+            id: 23,
+            question: 'Which bus routes serve 1025 Station Street directly?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'High-frequency bus routes run along Main Street (#3, #8, #19, N8, N19), Prior/Venables (#22), and Terminal Avenue, with upgraded covered transit shelters adjacent to the campus.'
+          },
+          {
+            id: 24,
+            question: 'Will my existing TransLink Compass pass or staff transit subsidy change?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'No. Existing employer-subsidized Compass cards and 3-Zone AutoLoad programs transfer seamlessly without re-enrollment.'
+          },
+          {
+            id: 25,
+            question: 'Is there a shuttle bus between the old Burrard site and the new hospital?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. A free, high-frequency staff shuttle operates every 15 minutes during shift-change windows (05:30–09:30 and 14:30–20:30) for the first 90 days post-move.'
+          },
+          {
+            id: 26,
+            question: 'Where do staff park and how is the underground parkade accessed?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Multi-level underground parking is accessed via National Avenue with automated RFID badge readers, license-plate recognition, and direct elevator cores into clinical towers.'
+          },
+          {
+            id: 27,
+            question: 'Are there reserved parking stalls for on-call physicians responding to emergencies?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Yes. Dedicated "Code / Urgent Call" stalls are located on P1 immediately beside the high-speed Interventional/ED elevator core for rapid sub-2-minute unit arrival.'
+          },
+          {
+            id: 28,
+            question: 'What EV charging infrastructure is available in the staff parkade?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Over 120 Level-2 EV charging stations are installed in the staff parkade levels, managed via mobile app queuing so off-going shifts can release chargers.'
+          },
+          {
+            id: 29,
+            question: 'What facilities exist for staff who cycle or run to work?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'A badge-locked End-of-Trip facility on P1 houses 350+ secure bike racks, e-bike charging outlets, a bike repair/pump stand, day lockers, and 24 private shower stalls.'
+          },
+          {
+            id: 30,
+            question: 'How are staff entrances separated from public and ambulance traffic?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Staff enter via dedicated badge-controlled portals on Station Street and P1/P2 parkade lobbies, completely separated from public drop-off loops and emergency ambulance bays.'
+          },
+          {
+            id: 31,
+            question: 'Is overnight parking guaranteed for residents and fellows on 24-hour call?',
+            roles: ['Residents/Fellows'],
+            answer: 'Yes. Residents and fellows scheduled for in-house call receive automated transponder validation for overnight call stalls adjacent to the quiet quarters elevators.'
+          },
+          {
+            id: 32,
+            question: 'What security features protect staff walking to transit or parking at night?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The 400m SkyTrain corridor and parkade feature bright LED pedestrian lighting, 24/7 CCTV, blue-light emergency intercoms, RTLS badge panic alerts, and 24/7 SafeWalk security escorts.'
+          },
+          {
+            id: 33,
+            question: 'Will parking rates increase at the new Station Street campus?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Staff parking rates remain aligned with regional health authority collective agreements and municipal transit zone parity—there is no move-related rate surcharge.'
+          },
+          {
+            id: 34,
+            question: 'How do I transfer my existing parking permit to the new parkade?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Active Burrard parking permit holders are automatically migrated in December 2026; your existing proximity badge will activate the new National Ave gates starting January 2027.'
+          },
+          {
+            id: 35,
+            question: 'Are there carpool or ride-share drop-off zones for staff?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Dedicated HOV/carpool stalls on P1 and a covered ride-share pick-up/drop-off bay on Station Street accommodate shared commutes.'
+          },
+          {
+            id: 36,
+            question: 'What is the expected driving time from Burrard St to 1025 Station St?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Via Dunsmuir/Prior Viaduct or Pacific Blvd, driving takes 10–15 minutes off-peak and 15–22 minutes during rush hour.'
+          },
+          {
+            id: 37,
+            question: 'Is there motorcycle or scooter parking on-site?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Designated covered motorcycle and e-scooter parking zones with anchor locks are situated near the P1 security office.'
+          },
+          {
+            id: 38,
+            question: 'How do visiting consultants or locum physicians access parking?',
+            roles: ['Physicians'],
+            answer: 'Locums and visiting specialists receive temporary QR-code parkade passes via Medical Affairs upon credentialing confirmation.'
+          },
+          {
+            id: 39,
+            question: 'Are there bike lanes connecting directly to the new hospital?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. The campus connects directly to the Adanac Bikeway, Central Valley Greenway, and False Creek Seawall protected cycling networks.'
+          },
+          {
+            id: 40,
+            question: 'What happens if I forget my badge on Move Day and cannot open the parkade gate?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: '24/7 intercoms at all parkade gates connect directly to Security Dispatch, and a temporary badge desk will be staffed at the Station St entrance throughout February 2027.'
+          }
+        ]
+      },
+      {
+        id: 'cat3',
+        category: '3. Spatial Layout & Design',
+        shortTitle: 'Spatial Design',
+        description: '100% single rooms, continuous critical care floor, 4-pod ED, and negative-pressure zones.',
+        faqs: [
+          {
+            id: 41,
+            question: 'Are all inpatient rooms at the new hospital single-occupancy?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. 100% of inpatient beds are private single-occupancy rooms with en-suite accessible bathrooms, natural daylight windows, and dedicated family sleeper zones.'
+          },
+          {
+            id: 42,
+            question: 'How are the ICU, CICU, CSICU, and High Acuity Units organized?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'All adult critical care units (ICU, Cardiac ICU, Cardiac Surgery ICU, and HAU) are co-located on a single continuous floor plate, allowing shared equipment, rapid cross-coverage, and zero elevator transfers.'
+          },
+          {
+            id: 43,
+            question: 'How is the new Emergency Department laid out?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The ED is divided into four acuity-based pods (Resuscitation/Trauma, Acute Care, Rapid Assessment/Fast Track, and Behavioral/Substance Health) with dedicated CT scanners inside the ED footprint.'
+          },
+          {
+            id: 44,
+            question: 'Where are physician work pods located on inpatient units?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Acoustically glazed physician touch-down pods are embedded directly inside every 12-bed care module, offering dual-screen EHR workstations and dictation stations steps from patient rooms.'
+          },
+          {
+            id: 45,
+            question: 'How are medications and clean supplies distributed across long corridors?',
+            roles: ['Nursing', 'Physicians', 'Allied Health'],
+            answer: 'Instead of one central supply room, decentralized supply alcoves and automated medication dispensing cabinets are positioned every 6 rooms to reduce nurse walking time by over 40%.'
+          },
+          {
+            id: 46,
+            question: 'How many negative-pressure airborne isolation rooms are built into the facility?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The hospital includes over 75 permanent negative-pressure airborne isolation rooms (AIIRs) with anterooms, plus modular 12-to-16-room "outbreak zones" that can switch to 100% negative pressure via HVAC controls.'
+          },
+          {
+            id: 47,
+            question: 'How are clean and soiled materials separated on clinical floors?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Strict dual-corridor separation ensures clean linen/sterile carts travel via dedicated clean elevators while soiled utility and waste travel via isolated back-of-house service cores.'
+          },
+          {
+            id: 48,
+            question: 'How do nurses maintain visual sightlines with 100% private single rooms?',
+            roles: ['Nursing', 'Physicians', 'Residents/Fellows'],
+            answer: 'Each room features angled glass doors with switchable privacy blinds, decentralized charting alcoves between room pairs, and continuous central telemetry/video observation for high-risk patients.'
+          },
+          {
+            id: 49,
+            question: 'What is the standardized room layout across inpatient floors?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'All inpatient rooms follow a "same-handed" standardized layout—meaning medical gases, suction, code buttons, and sharps containers are in the exact same spot in every room to eliminate cognitive friction during emergencies.'
+          },
+          {
+            id: 50,
+            question: 'Where is the helipad located and how does it connect to Trauma and Cath Labs?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'The rooftop helipad connects via a dedicated, key-override trauma elevator directly to the ED resuscitation bays, Hybrid ORs, and Cardiac Cath Labs in under 45 seconds.'
+          },
+          {
+            id: 51,
+            question: 'How are outpatient clinics grouped to streamline multidisciplinary care?',
+            roles: ['Physicians', 'Nursing', 'Allied Health'],
+            answer: 'Outpatient clinics are organized into integrated thematic centers (Heart & Lung, Kidney, Urban Health, Maternity) with shared exam rooms, phlebotomy stations, and point-of-care diagnostics.'
+          },
+          {
+            id: 52,
+            question: 'What dedicated spaces exist for behavioral health and substance use care?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Purpose-built, ligature-safe inpatient units and a specialized Rapid Access Addiction Clinic feature calming sensory environments, secure outdoor courtyards, and discreet staff safety exits.'
+          },
+          {
+            id: 53,
+            question: 'How wide are clinical corridors and room doorways for bedside procedures?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Main clinical corridors are 2.4–3.0 meters wide and room doors are 1.5 meters wide, allowing portable CT, ECMO carts, and full ICU beds to maneuver effortlessly without clearing furniture.'
+          },
+          {
+            id: 54,
+            question: 'Where are family waiting lounges located on inpatient and critical care floors?',
+            roles: ['Nursing', 'Physicians', 'Allied Health'],
+            answer: 'Each floor features sunlit family lounges outside clinical corridors, plus private, acoustically isolated Family Consultation Rooms for sensitive goals-of-care discussions.'
+          },
+          {
+            id: 55,
+            question: 'Are dialysis hookups built into inpatient and ICU rooms?',
+            roles: ['Physicians', 'Nursing'],
+            answer: '100% of ICU/HAU rooms and designated renal inpatient pods have built-in reverse-osmosis water and drain boxes, enabling bedside hemodialysis without moving the patient.'
+          },
+          {
+            id: 56,
+            question: 'How is natural daylight integrated into clinical workspaces?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Floor-to-ceiling glazing in patient rooms, end-of-corridor light wells, and central atrium skylights bring natural daylight into care team hubs and nursing stations.'
+          },
+          {
+            id: 57,
+            question: 'Where are inpatient pharmacy satellites located?',
+            roles: ['Physicians', 'Nursing', 'Allied Health'],
+            answer: 'Clinical pharmacy satellites are embedded on the Critical Care floor, Interventional Platform, and Acute Medicine towers for direct bedside pharmacist rounding.'
+          },
+          {
+            id: 58,
+            question: 'How are radiology and diagnostic imaging positioned relative to acute floors?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Core diagnostic imaging (MRI, CT, Nuclear Medicine, Interventional Radiology) sits directly vertically aligned with the ED and Critical Care elevators for rapid inpatient transport.'
+          },
+          {
+            id: 59,
+            question: 'What acoustic dampening measures reduce hospital noise at night?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Sound-absorbing ceiling tiles, rubberized acoustic flooring, silent visual paging alerts, and soft-close hardware reduce ambient ward noise by over 35%.'
+          },
+          {
+            id: 60,
+            question: 'How is wayfinding color-coded across the two 11-storey towers?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The North and South towers use distinct color-coded elevator cores (Blue Core, Green Core, Amber Core) paired with clear floor-level landmark icons and digital wayfinding kiosks.'
+          }
+        ]
+      },
+      {
+        id: 'cat4',
+        category: '4. Clinical Tech & RTLS',
+        shortTitle: 'Tech & RTLS',
+        description: 'RTLS asset/staff tracking, clinical smartphones, Smart Alarms, and Wi-Fi 6 infrastructure.',
+        faqs: [
+          {
+            id: 61,
+            question: 'How does the Real-Time Location System (RTLS) work for equipment and staff?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Ceiling IR/BLE sensors track RTLS tags on IV pumps, bladder scanners, and wheelchairs to the exact room. Staff badges also include an RTLS duress button that pinpoints your exact location for security response.'
+          },
+          {
+            id: 62,
+            question: 'What clinical smartphones will replace legacy pagers and desk phones?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Staff receive ruggedized enterprise clinical smartphones preloaded with mobile EHR, secure role-based messaging, VoIP extension calling, Smart Alarm routing, and code alerts.'
+          },
+          {
+            id: 63,
+            question: 'How does Smart Alarm middleware reduce alarm fatigue?',
+            roles: ['Nursing', 'Physicians', 'Residents/Fellows'],
+            answer: 'Instead of audible bedside noise, physiologic monitor and IV pump alarms are filtered by severity and routed silently to the assigned primary nurse’s smartphone, escalating to a buddy nurse if unacknowledged after 30 seconds.'
+          },
+          {
+            id: 64,
+            question: 'How are Code Blue, Code STEMI, and Code Stroke activated in the new building?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Pressing the dedicated wall-mounted Code button in any room—or triggering a single-touch alert on a clinical smartphone—simultaneously notifies overhead zones, code team phones, and unlocks automated elevator priority.'
+          },
+          {
+            id: 65,
+            question: 'What features are on the wall-mounted interactive patient room screens?',
+            roles: ['Nursing', 'Physicians', 'Allied Health'],
+            answer: 'Patient infotainment/care screens display live care-team photos and names, daily schedule milestones, room temperature/lighting controls, educational videos, and on-demand meal ordering.'
+          },
+          {
+            id: 66,
+            question: 'How is virtual telehealth hardware built into inpatient and outpatient rooms?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Outpatient rooms and mobile inpatient carts feature integrated 4K pan-tilt-zoom cameras and beam-forming mics, allowing one-click virtual family rounds or remote subspecialty consults.'
+          },
+          {
+            id: 67,
+            question: 'How does the smart pneumatic tube system prioritize urgent lab specimens?',
+            roles: ['Nursing', 'Physicians', 'Residents/Fellows', 'Allied Health'],
+            answer: 'RFID-tagged carriers allow staff to select "STAT" priority on the touchscreen station; the automated matrix routes STAT blood gases and troponins directly to Core Lab in under 90 seconds.'
+          },
+          {
+            id: 68,
+            question: 'Will Wi-Fi 6 coverage eliminate dead zones in elevators and stairwells?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. High-density Wi-Fi 6 access points and distributed cellular antenna systems (DAS) provide seamless roaming across all 11 floors, elevator shafts, stairwells, and P1–P3 parkade levels.'
+          },
+          {
+            id: 69,
+            question: 'What happens to clinical IT and life-support systems during a citywide power outage?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Dual-ring fiber optics, uninterruptible battery banks (UPS), and N+1 seismic diesel generators provide 96+ hours of uninterrupted power to all clinical networks, HVAC, and life-support outlets.'
+          },
+          {
+            id: 70,
+            question: 'How does tap-and-go Single Sign-On (SSO) work at clinical workstations?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Tapping your proximity badge on any workstation reader logs you into your virtual desktop session in under 3 seconds; tapping again locks the screen while preserving your active EHR state.'
+          },
+          {
+            id: 71,
+            question: 'Are physiological monitors wireless for ambulatory inpatients?',
+            roles: ['Nursing', 'Physicians', 'Residents/Fellows'],
+            answer: 'Yes. Lightweight wearable telemetry packs transmit continuous 5-lead ECG, SpO2, and NIBP across the entire floor plate, allowing patients to ambulate freely while monitored.'
+          },
+          {
+            id: 72,
+            question: 'How do digital whiteboards at care team hubs update patient status?',
+            roles: ['Nursing', 'Physicians', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Large touchscreen EHR status boards at unit hubs automatically sync with admission/discharge events, pending imaging, isolation precautions, and fall-risk flags.'
+          },
+          {
+            id: 73,
+            question: 'Can physicians dictate directly into the EHR using personal smartphones?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Yes. Secure mobile dictation apps link to your EHR profile, enabling encrypted voice-to-text clinical documentation from anywhere in the hospital.'
+          },
+          {
+            id: 74,
+            question: 'How are biomedical equipment malfunctions reported on the floor?',
+            roles: ['Nursing', 'Physicians', 'Allied Health'],
+            answer: 'Scanning the QR/RTLS barcode on any faulty pump or monitor with your clinical smartphone auto-populates its asset ID and room location into a Biomed service ticket.'
+          },
+          {
+            id: 75,
+            question: 'Is there a digital wayfinding app for staff and patients?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Indoor blue-dot Bluetooth navigation provides turn-by-turn walking directions from any entrance or elevator core to specific rooms, clinics, or call suites.'
+          },
+          {
+            id: 76,
+            question: 'How are automated temperature alerts handled for medication refrigerators?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Continuous wireless temperature probes monitor all unit med fridges and blood warmers, sending instant alerts to Pharmacy and unit leads if thresholds drift.'
+          },
+          {
+            id: 77,
+            question: 'Will legacy pagers still work during the February 2027 transition?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Legacy pagers remain active in parallel for 60 days post-move, bridged directly into the new clinical smartphone messaging gateway so no pages are dropped.'
+          },
+          {
+            id: 78,
+            question: 'How are radiology PACS images viewed at the bedside?',
+            roles: ['Physicians', 'Residents/Fellows', 'Nursing'],
+            answer: 'In-room swing-arm clinical terminals and mobile tablets support full diagnostic PACS viewing so physicians can review X-rays and CTs directly with patients.'
+          },
+          {
+            id: 79,
+            question: 'How does automated patient meal ordering prevent dietary errors?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Room-service tablets filter menu choices automatically against active EHR diet orders (e.g., NPO, fluid restriction, renal, dysphagia, allergies).'
+          },
+          {
+            id: 80,
+            question: 'Who provides 24/7 IT support on the floors during the first month?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Dedicated "At-the-Elbow" Clinical Informatics specialists in bright teal vests are stationed 24/7 on every inpatient unit, ED pod, and OR suite for the first 30 days.'
+          }
+        ]
+      },
+      {
+        id: 'cat5',
+        category: '5. Physician On-Call Facilities',
+        shortTitle: 'On-Call Rooms',
+        description: 'Circadian call suites, dynamic RFID badge access, Medical Staff Lounge, and express elevators.',
+        faqs: [
+          {
+            id: 81,
+            question: 'Where are the physician and resident on-call rooms located?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'There is a centralized, badge-restricted Quiet Quarters zone on Level 4 plus dedicated rapid-response call clusters immediately adjacent to ICU, L&D, ED, and the Interventional Platform.'
+          },
+          {
+            id: 82,
+            question: 'What amenities are inside each individual on-call room?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Every call suite includes a twin-XL hospital-grade mattress, STC-55 acoustic wall insulation, blackout blinds, circadian dimmable lighting, an EHR workstation desk, and an en-suite private washroom/shower.'
+          },
+          {
+            id: 83,
+            question: 'How do on-call staff access food and coffee at 03:00 AM?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'The Quiet Quarters lounge and Medical Staff Lounge feature 24/7 card-access micro-markets stocked with fresh wraps, hot meals, fruit, espresso machines, and microwaves.'
+          },
+          {
+            id: 84,
+            question: 'Are resident call rooms separated from attending call rooms?',
+            roles: ['Residents/Fellows', 'Physicians'],
+            answer: 'Yes. Dedicated resident/fellow call pods sit alongside a trainee common lounge and kitchen, separate from attending call suites while sharing rapid elevator access.'
+          },
+          {
+            id: 85,
+            question: 'What is included in the new centralized Medical Staff Lounge?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Located on Level 2 with outdoor terrace access, the badge-restricted Medical Staff Lounge offers ergonomic dictation booths, collaborative seating, hot breakfast/lunch service, and coffee bars.'
+          },
+          {
+            id: 86,
+            question: 'How are call rooms cleaned and turned over between shifts?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Environmental Services performs scheduled daily linen turnovers at 08:00 AM; tapping "Checkout / Clean Room" on the in-room tablet triggers immediate housekeeping refresh.'
+          },
+          {
+            id: 87,
+            question: 'Are sound-proof dictation stations available inside call quarters?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Yes. Acoustically isolated dictation booths with dual monitors, PowerMic hardware, and Dragon Medical One are located inside both the Quiet Quarters and Medical Staff Lounge.'
+          },
+          {
+            id: 88,
+            question: 'How fast can an on-call physician reach the ED, OR, or Cath Lab from call rooms?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'A dedicated Staff Express Elevator bank connects the Quiet Quarters directly to the ED, Critical Care floor, and Interventional Platform in under 30 seconds.'
+          },
+          {
+            id: 89,
+            question: 'How are on-call rooms assigned—do I still need to pick up a physical key?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'No physical keys are used. Your hospital proximity badge is dynamically programmed via the daily on-call schedule to unlock your assigned suite automatically.'
+          },
+          {
+            id: 90,
+            question: 'Are there secure lockers for overnight bags and personal electronics in call zones?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Yes. Digital PIN-code lockers with internal USB-C charging outlets are provided in the Quiet Quarters lobby for staff on home-call or split-shift rotations.'
+          },
+          {
+            id: 91,
+            question: 'Is there a quiet reflection or prayer room near the on-call quarters?',
+            roles: ['Physicians', 'Residents/Fellows', 'Nursing', 'Allied Health'],
+            answer: 'An all-faith quiet contemplation and prayer room with ablution facilities is situated on the same level just outside the Quiet Quarters corridor.'
+          },
+          {
+            id: 92,
+            question: 'Can on-call physicians adjust room temperature independently in call suites?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Yes. Each call room has an individual digital thermostat allowing independent heating and cooling control.'
+          },
+          {
+            id: 93,
+            question: 'How are overhead emergency codes heard inside sound-insulated call rooms?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'While hallway noise is blocked, an in-room life-safety speaker and your clinical smartphone chime immediately for unit-specific emergency codes.'
+          },
+          {
+            id: 94,
+            question: 'Are surgical scrubs available directly inside the on-call quarters?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Automated scrubEx dispensing and return machines are positioned at the Quiet Quarters elevator lobby so call teams can grab fresh scrubs without detouring to OR locker rooms.'
+          },
+          {
+            id: 95,
+            question: 'Is there a dedicated lounge for fellows and chief residents?',
+            roles: ['Residents/Fellows'],
+            answer: 'Yes. A dedicated Trainee Academic & Wellness Lounge includes whiteboards, journal access, reclining rest pods, and coffee/snack stations.'
+          },
+          {
+            id: 96,
+            question: 'How many total on-call rooms exist compared to the legacy Burrard hospital?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Total dedicated on-call suites increase by over 45%, eliminating double-bunking and ensuring every in-house call service has private accommodation.'
+          },
+          {
+            id: 97,
+            question: 'Are white coats and lab coats laundered on-site for medical staff?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Yes. Automated coat drop-off and clean-coat pickup lockers are integrated into the Medical Staff Lounge service alcove.'
+          },
+          {
+            id: 98,
+            question: 'Can home-call physicians access shower and locker facilities before morning rounds?',
+            roles: ['Physicians'],
+            answer: 'Yes. Day-use shower suites and grooming stations inside the Medical Staff Lounge are accessible 24/7 with your medical staff badge.'
+          },
+          {
+            id: 99,
+            question: 'Who do I contact if my badge fails to unlock an assigned call room at night?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'The 24/7 Switchboard / Security desk (extension 72000) can remotely unlock any call room door and push an instant credential refresh to your badge.'
+          },
+          {
+            id: 100,
+            question: 'Are personal items insured or secured if I am called to an emergency from my call room?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Call suite doors automatically deadbolt upon exit and only unlock for your assigned badge or housekeeping audit logs.'
+          }
+        ]
+      },
+      {
+        id: 'cat6',
+        category: '6. Nursing Workflows',
+        shortTitle: 'Nursing',
+        description: 'Decentralized room-pair pods, 100% ceiling lifts, smart call-bells, and point-of-use carts.',
+        faqs: [
+          {
+            id: 101,
+            question: 'How does the decentralized nursing layout change my daily shift workflow?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Instead of walking back to one central hub, you chart at ergonomic touch-down pods positioned right between every two patient rooms—keeping you steps from your assignment while maintaining team connection.'
+          },
+          {
+            id: 102,
+            question: 'How do patient call-bells route to my clinical smartphone?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'When a patient presses their pillow speaker, they select a category (Pain, Bathroom, Water, Assistance). The request routes directly to the assigned nurse’s phone with color-coded urgency.'
+          },
+          {
+            id: 103,
+            question: 'Where are patient-specific medications stored to reduce medication pass delays?',
+            roles: ['Nursing'],
+            answer: 'Each single-patient room has a biometric/badge-locked nurse server cabinet for patient-specific meds, while high-use narcotics and first-dose meds sit in decentralized automated dispensing cabinets every 6 rooms.'
+          },
+          {
+            id: 104,
+            question: 'How are bedside shift handoffs conducted in 100% single rooms?',
+            roles: ['Nursing', 'Physicians'],
+            answer: 'Incoming and outgoing nurses perform warm bedside handoffs using mobile workstations-on-wheels (WOWs) and the in-room digital care board, actively involving the patient and family.'
+          },
+          {
+            id: 105,
+            question: 'Do all inpatient rooms have ceiling-mounted patient lifts?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Yes. 100% of inpatient, critical care, and ED bays are equipped with overhead H-track ceiling lifts covering both the bed and the en-suite bathroom to prevent musculoskeletal injuries.'
+          },
+          {
+            id: 106,
+            question: 'What do the new unit nursing break rooms look like?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Every clinical unit has a dedicated, sunlit staff break room with full-size refrigerators, dishwashers, microwaves, comfortable lounge seating, and direct access to outdoor balconies or terraces.'
+          },
+          {
+            id: 107,
+            question: 'How do I summon a Clinical Nurse Specialist, Educator, or Rapid Response Team?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'One-tap role directories on your clinical smartphone connect you directly to your unit’s CNE, CNS, Charge Nurse, or the mobile Critical Care Outreach Team (CCOT).'
+          },
+          {
+            id: 108,
+            question: 'Will nurses still have to restock linen and supply carts manually?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'No. Material Management technicians run a two-bin Kanban automated replenishment system, swapping empty supply bins and restocking in-room nurse servers twice daily.'
+          },
+          {
+            id: 109,
+            question: 'How are daily nurse-patient assignments linked to phones and call bells?',
+            roles: ['Nursing'],
+            answer: 'At shift start, the Charge Nurse updates the digital assignment board; tapping your badge to your clinical smartphone automatically binds your assigned rooms’ call bells and telemetry alerts.'
+          },
+          {
+            id: 110,
+            question: 'Where are daily shift huddles and unit education sessions held?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Each unit features a dedicated Multipurpose Huddle & Education Room with digital Kanban boards, seating for 20+ staff, and hybrid video conferencing.'
+          },
+          {
+            id: 111,
+            question: 'How do nurses isolate a room quickly if a patient develops infectious symptoms?',
+            roles: ['Nursing', 'Physicians', 'Allied Health'],
+            answer: 'Every room has an anteroom/PPE alcove right outside the door stocked with isolation caddies, and designated airborne rooms switch to negative pressure via a keyed wall switch.'
+          },
+          {
+            id: 112,
+            question: 'Where are soiled utility and hopper rooms located on long wards?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Two soiled utility rooms with automated bedpan macerators/washers are positioned at opposite ends of every inpatient unit to minimize travel with biohazard waste.'
+          },
+          {
+            id: 113,
+            question: 'How do nurses communicate with isolated patients without entering the room unnecessarily?',
+            roles: ['Nursing'],
+            answer: 'Two-way hands-free intercoms link the outside charting pod directly to the patient’s bedside speaker, allowing quick verbal check-ins before donning full PPE.'
+          },
+          {
+            id: 114,
+            question: 'Are there dedicated lactation rooms for nursing staff returning from parental leave?',
+            roles: ['Nursing', 'Physicians', 'Allied Health'],
+            answer: 'Yes. Private, badge-locked wellness/lactation rooms with hospital-grade pumps, sinks, and dedicated milk refrigerators are located on clinical tower zones.'
+          },
+          {
+            id: 115,
+            question: 'How is bariatric patient care supported in the new rooms?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Designated bariatric suites on every floor feature extra-wide doorways, floor-mounted heavy-duty toilets, and 1,000-lb capacity ceiling lift motors.'
+          },
+          {
+            id: 116,
+            question: 'Where are portable ultrasound and bladder scanners stored so they don’t go missing?',
+            roles: ['Nursing', 'Physicians', 'Residents/Fellows'],
+            answer: 'Equipment alcoves with charging outlets sit at the center of each pod, and every device carries an RTLS tag viewable on unit maps in real time.'
+          },
+          {
+            id: 117,
+            question: 'How does the Charge Nurse maintain unit-wide situational awareness across single rooms?',
+            roles: ['Nursing'],
+            answer: 'The central Charge Hub features panoramic digital status screens displaying real-time acuity scores, call-bell response times, telemetry strips, and RTLS staff locations.'
+          },
+          {
+            id: 118,
+            question: 'Are mobile workstations-on-wheels (WOWs) lightweight and adjustable?',
+            roles: ['Nursing', 'Allied Health'],
+            answer: 'Yes. Fleet-wide sit-to-stand ergonomic WOWs feature hot-swappable batteries, built-in barcode medication scanners, and antimicrobial surfaces.'
+          },
+          {
+            id: 119,
+            question: 'How will nursing unit culture and team cohesion be preserved in a larger footprint?',
+            roles: ['Nursing'],
+            answer: 'Central team touchdown hubs, shared break lounges, and structured mid-shift buddy check-ins are designed into unit workflows to prevent isolation.'
+          },
+          {
+            id: 120,
+            question: 'Can nurses request immediate security assistance silently if a visitor becomes aggressive?',
+            roles: ['Nursing', 'Physicians', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Pressing the recessed duress button on your RTLS badge or smartphone sends a silent Code White alert with your exact room coordinates to Security.'
+          }
+        ]
+      },
+      {
+        id: 'cat7',
+        category: '7. Surgical & Interventional Platform',
+        shortTitle: 'Surgical Suites',
+        description: 'Unified Interventional Platform, Hybrid ORs, Cath/EP labs, and MDRD express elevators.',
+        faqs: [
+          {
+            id: 121,
+            question: 'What is the unified Interventional Platform?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'Operating rooms, Cardiac Catheterization labs, Electrophysiology (EP) labs, and Interventional Radiology suites are co-located on a single floor plate with shared pre-op, PACU, and sterile cores.'
+          },
+          {
+            id: 122,
+            question: 'How many Hybrid ORs and specialized robotic surgical suites are included?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'The surgical suite expands to 18+ operating rooms, including 3 large Hybrid ORs with fixed biplane angiography/intraoperative CT and dedicated robotic surgery suites.'
+          },
+          {
+            id: 123,
+            question: 'How fast do surgical instruments move between MDRD and the Operating Rooms?',
+            roles: ['Physicians', 'Nursing', 'Allied Health'],
+            answer: 'Medical Device Reprocessing (MDRD) sits directly below the OR floor, linked by dedicated high-speed Clean and Soiled case-cart elevators with sub-60-second transit.'
+          },
+          {
+            id: 124,
+            question: 'Where is the Post-Anesthesia Care Unit (PACU) located?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The 32-bay PACU sits immediately adjacent to the OR sterile core on the same floor, featuring negative-pressure recovery bays and direct sightlines.'
+          },
+          {
+            id: 125,
+            question: 'How do Cardiac Cath and EP labs share recovery resources with Surgery?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'A flexible "swing-bay" Day Surgery / Interventional Prep & Recovery unit accommodates both surgical and Cath/EP patients, smoothing afternoon procedural surges.'
+          },
+          {
+            id: 126,
+            question: 'Where do surgeons and interventionalists dictate op-notes and review imaging?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Dedicated surgeon touch-down lounges and sound-insulated dictation booths sit inside the central procedural core steps away from scrub sinks.'
+          },
+          {
+            id: 127,
+            question: 'How are intraoperative frozen-section specimens sent to Pathology?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'A dedicated point-to-point pneumatic tube runs directly from the OR sterile core to the Pathology Frozen Section lab, with live video microscopy broadcast back to OR monitors.'
+          },
+          {
+            id: 128,
+            question: 'What locker room and lounge upgrades exist for perioperative teams?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Expanded all-gender and gendered locker rooms feature automated scrub dispensers, day lockers, shower suites, and a large sunlit perioperative staff dining lounge.'
+          },
+          {
+            id: 129,
+            question: 'How are families updated during lengthy cardiac or complex surgical cases?',
+            roles: ['Nursing', 'Physicians', 'Allied Health'],
+            answer: 'Automated OR milestone tracking pushes encrypted SMS updates (Case Started, In Progress, Closing, In PACU) to families and displays anonymized codes in the Surgical Family Lounge.'
+          },
+          {
+            id: 130,
+            question: 'How are emergency trauma and urgent cardiac ORs kept ready 24/7?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'Two dedicated emergency ORs and one emergency Cath/EP lab sit directly beside the trauma/helipad elevator core with pre-staged sterile case carts.'
+          },
+          {
+            id: 131,
+            question: 'Are ceiling-mounted booms standardized across all operating rooms?',
+            roles: ['Physicians', 'Nursing'],
+            answer: 'Yes. Dual articulating anesthesia and surgical equipment booms with 4K/3D overhead monitors and integrated surgical lighting are identical across all standard ORs.'
+          },
+          {
+            id: 132,
+            question: 'How does intraoperative imaging integration work in the Hybrid ORs?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'Hybrid ORs feature ceiling-mounted robotic C-arms and sliding-gantry CT scanners integrated with 3D fusion navigation for TAVI, EVAR, and complex neuro/spine cases.'
+          },
+          {
+            id: 133,
+            question: 'Where are transesophageal echocardiography (TEE) and perfusion carts stored?',
+            roles: ['Physicians', 'Nursing', 'Allied Health'],
+            answer: 'Dedicated perfusion workrooms and TEE probe high-level disinfection alcoves sit directly inside the Cardiovascular OR cluster.'
+          },
+          {
+            id: 134,
+            question: 'How are surgical implants and specialty prosthetics tracked?',
+            roles: ['Nursing', 'Physicians', 'Allied Health'],
+            answer: 'RFID-enabled smart supply cabinets in the sterile core automatically log implant lot numbers and expiration dates into the patient’s operative record upon barcode scan.'
+          },
+          {
+            id: 135,
+            question: 'Is there a dedicated Anesthesia Induction and Block Room?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'Yes. A 6-bay Regional Anesthesia & Block Room equipped with dedicated ultrasound machines allows parallel nerve blocks prior to OR entry.'
+          },
+          {
+            id: 136,
+            question: 'How are surgical smoke evacuation and air exchanges managed in the ORs?',
+            roles: ['Physicians', 'Nursing', 'Allied Health'],
+            answer: 'All ORs exceed CSA Z317.2 standards with laminar airflow diffusers, 25+ air changes per hour, and built-in silent surgical smoke evacuation systems.'
+          },
+          {
+            id: 137,
+            question: 'Can surgical cases be broadcast live to the Clinical Simulation Centre or UBC auditoriums?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Yes. Encrypted AV routing allows consenting live surgical and Cath/EP procedures to stream interactively to academic conference rooms for teaching.'
+          },
+          {
+            id: 138,
+            question: 'Where do ICU teams take over post-op cardiac surgery patients?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'A dedicated wide-corridor Cardiac OR-to-CSICU elevator bank delivers intubated post-op patients directly onto the Continuous Critical Care floor in under 40 seconds.'
+          },
+          {
+            id: 139,
+            question: 'How are last-minute add-on emergency cases scheduled digitally?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows'],
+            answer: 'Surgeons submit electronic OR booking requests via mobile EHR, displaying real-time emergency board queue positions and Anesthesia readiness.'
+          },
+          {
+            id: 140,
+            question: 'What radiation protection upgrades are built into the Cath/EP and Hybrid suites?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Ceiling-suspended zero-gravity lead aprons, articulated radiation shields, and real-time personal dosimetry badges reduce operator radiation exposure by over 70%.'
+          }
+        ]
+      },
+      {
+        id: 'cat8',
+        category: '8. Academic & Research',
+        shortTitle: 'Academic (UBC)',
+        description: 'UBC seminar rooms, hybrid Grand Rounds, 2029 CSRC skybridge, and Simulation Centre.',
+        faqs: [
+          {
+            id: 141,
+            question: 'How are UBC Faculty of Medicine teaching spaces integrated into the new hospital?',
+            roles: ['Physicians', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Distributed seminar rooms, clinical skills labs, and resident touchdown pods are embedded on every clinical floor so bedside teaching happens steps from patient wards.'
+          },
+          {
+            id: 142,
+            question: 'Where will departmental Grand Rounds and academic conferences be held?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'A 250-seat tiered Academic Auditorium and divisible conference suites feature dual 4K laser projectors, audience microphones, and seamless Zoom/Teams hybrid broadcasting.'
+          },
+          {
+            id: 143,
+            question: 'How will active clinical trials and investigational drugs transition in February 2027?',
+            roles: ['Physicians', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The Clinical Research Unit follows a validated cold-chain transfer protocol 48 hours pre-move, relocating investigational biologics in temperature-logged transport coolers.'
+          },
+          {
+            id: 144,
+            question: 'When does the Clinical Support and Research Centre (CSRC) open?',
+            roles: ['Physicians', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The adjacent CSRC research tower—connected to the main hospital via an enclosed skybridge—opens in early 2029. Dedicated interim dry/wet research space operates inside the main campus from 2027–2029.'
+          },
+          {
+            id: 145,
+            question: 'What study and dictation facilities are built specifically for residents and fellows?',
+            roles: ['Residents/Fellows', 'Physicians'],
+            answer: 'Every clinical tower includes badge-access Resident Learning Pods equipped with dual-screen EHR terminals, printing, lockers, and quiet study carrels.'
+          },
+          {
+            id: 146,
+            question: 'What capabilities are in the new on-site Clinical Simulation Centre?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The high-fidelity Sim Centre houses mock ICU, OR, and trauma bays with wireless adult/pediatric mannequins, debriefing rooms, and audiovisual recording for interdisciplinary code drills.'
+          },
+          {
+            id: 147,
+            question: 'Are medical library services and UBC e-journals accessible on-site?',
+            roles: ['Physicians', 'Residents/Fellows', 'Nursing', 'Allied Health'],
+            answer: 'Yes. A 24/7 Health Sciences Library Commons provides silent study rooms, librarian consultation desks, and direct workstations linked to UBC Library databases.'
+          },
+          {
+            id: 148,
+            question: 'How will medical students and off-service residents orient to the new building?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Incoming learners complete a 30-minute interactive 3D Digital Twin wayfinding module prior to rotation start, paired with a badge-activation walkthrough on Day 1.'
+          },
+          {
+            id: 149,
+            question: 'Are research freezers and biobanks protected by emergency generator power?',
+            roles: ['Physicians', 'Residents/Fellows', 'Allied Health'],
+            answer: '100% of -80°C ultra-low freezers and liquid nitrogen dewars in the Research Pharmacy and Biobank sit on red emergency power circuits with 24/7 automated telemetry alarms.'
+          },
+          {
+            id: 150,
+            question: 'How are multidisciplinary Tumor Boards and Heart Team rounds accommodated?',
+            roles: ['Physicians', 'Residents/Fellows', 'Nursing', 'Allied Health'],
+            answer: 'Dedicated Multidisciplinary Case Conference rooms feature 98-inch diagnostic PACS displays, digital pathology slide viewers, and multi-site teleconferencing.'
+          },
+          {
+            id: 151,
+            question: 'Can clinical researchers consent and enroll patients directly on inpatient units?',
+            roles: ['Physicians', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Private family consultation rooms on every inpatient floor and mobile e-consent tablets allow confidential trial enrollment at the bedside.'
+          },
+          {
+            id: 152,
+            question: 'Where are clinical research coordinators stationed in the new hospital?',
+            roles: ['Physicians', 'Allied Health'],
+            answer: 'Touch-down desks for Clinical Research Coordinators are integrated into outpatient thematic clinics and inpatient academic hubs.'
+          },
+          {
+            id: 153,
+            question: 'Is there an outpatient Clinical Trials Unit for Phase I–III infusions and visits?',
+            roles: ['Physicians', 'Nursing', 'Allied Health'],
+            answer: 'Yes. A dedicated 10-chair Outpatient Clinical Trials & Infusion Suite with an adjacent pharmacokinetic lab operates on Level 3.'
+          },
+          {
+            id: 154,
+            question: 'How will trainee wellness and academic half-days be supported during the move?',
+            roles: ['Residents/Fellows', 'Physicians'],
+            answer: 'Protected academic half-days continue uninterrupted, utilizing the new Sim Centre and seminar rooms with catered lunch options.'
+          },
+          {
+            id: 155,
+            question: 'Are there poster printing and medical media services on campus?',
+            roles: ['Physicians', 'Residents/Fellows', 'Nursing', 'Allied Health'],
+            answer: 'Academic media support and large-format scientific poster printing remain accessible through the Level 2 Academic Commons.'
+          },
+          {
+            id: 156,
+            question: 'How do visiting professors and external examiners access the hospital?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Medical Education coordinators issue pre-registered visitor passes and skybridge/auditorium directions via email ahead of OSCEs and visiting lectures.'
+          },
+          {
+            id: 157,
+            question: 'Will bedside ultrasound training machines be available for residents?',
+            roles: ['Residents/Fellows', 'Physicians'],
+            answer: 'Point-of-care ultrasound (POCUS) carts with cloud image archiving for faculty feedback are stationed in the ED, ICU, and Internal Medicine teaching pods.'
+          },
+          {
+            id: 158,
+            question: 'How are IRB/REB ethics amendments handled for the change of hospital address?',
+            roles: ['Physicians', 'Allied Health'],
+            answer: 'The Research Ethics Board has issued a blanket administrative site-relocation amendment covering all active SPH protocols—no individual investigator re-submissions are required.'
+          },
+          {
+            id: 159,
+            question: 'Is high-speed research computing / REDCap network access available on clinical floors?',
+            roles: ['Physicians', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Dedicated research VLAN ports and secure Wi-Fi access allow seamless REDCap and health-authority analytics access from academic workstations.'
+          },
+          {
+            id: 160,
+            question: 'Who leads academic readiness for medical students and residents during Move Week?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'The Site Medical Education Lead and Chief Residents coordinate daily transition briefings to ensure learners are safely paired with supervising attendings.'
+          }
+        ]
+      },
+      {
+        id: 'cat9',
+        category: '9. Staff Wellness & Dining',
+        shortTitle: 'Wellness',
+        description: 'Main-level food courts, 24/7 micro-markets, rooftop gardens, and Indigenous Wellness Centre.',
+        faqs: [
+          {
+            id: 161,
+            question: 'What dining and coffee options will be open on the main concourse?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The main-level retail concourse features a specialty coffee bar, fresh sushi/poke, artisan sandwich/salad stations, hot global entrees, and dietary-inclusive (halal, kosher, vegan, gluten-free) options.'
+          },
+          {
+            id: 162,
+            question: 'Where can night-shift and weekend staff get fresh food when retail closes?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Central staff lounges on Levels 2, 4, and 7 house 24/7 self-checkout micro-markets stocked daily with hot-ready meals, wraps, salads, snacks, and bean-to-cup espresso machines.'
+          },
+          {
+            id: 163,
+            question: 'Are there outdoor gardens and green spaces accessible for staff breaks?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Landscaped rooftop staff terraces with seating and weather canopies overlook the North Shore mountains, and pedestrian paths connect directly into adjacent Trillium Park.'
+          },
+          {
+            id: 164,
+            question: 'What indoor quiet respite spaces exist for decompression after critical events?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'High-acuity floors (ED, ICU, OR, Maternity) feature sound-insulated Staff Decompression Rooms with dimmable circadian lighting, zero-gravity recliners, and calm acoustic soundscapes.'
+          },
+          {
+            id: 165,
+            question: 'How are staff lockers organized—do I get a permanent locker or a day locker?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'A hybrid model provides smart-badge day lockers right on your clinical unit for bags and lunch, plus permanent assigned lockers in the End-of-Trip/Change zones for outer gear.'
+          },
+          {
+            id: 166,
+            question: 'What spiritual, cultural, and Indigenous wellness spaces are on campus?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The main floor houses an All-Faith Sacred Chapel, multi-faith prayer rooms, and an Indigenous Wellness & Welcoming Centre ventilated for traditional smudging and cedar brushing ceremonies.'
+          },
+          {
+            id: 167,
+            question: 'Are childcare spaces available near the new hospital?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'A 74-space licensed early childhood care center is integrated into the health campus precinct with priority waitlist access for hospital staff.'
+          },
+          {
+            id: 168,
+            question: 'What psychological and peer support resources are available during the move?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Trained Peer Support Champions, Critical Incident Stress Management (CISM) teams, and on-site Employee & Family Assistance counselors hold daily drop-in hours throughout 2027.'
+          },
+          {
+            id: 169,
+            question: 'Is there an on-site staff fitness room or gym?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. A badge-access Staff Wellness & Movement Studio on Level 1 offers cardio machines, strength equipment, yoga/stretching mats, and direct access to shower facilities.'
+          },
+          {
+            id: 170,
+            question: 'Where are lactation and pumping rooms located for returning parents?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Six private, badge-locked Lactation Suites equipped with hospital-grade Symphony pumps, sinks, comfortable recliners, and dedicated milk fridges are distributed across the campus.'
+          },
+          {
+            id: 171,
+            question: 'Is there an on-site retail pharmacy and convenience shop for staff?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. An outpatient/staff retail pharmacy and convenience sundries shop operate on the main concourse with extended evening hours.'
+          },
+          {
+            id: 172,
+            question: 'Can staff bring their own food and store lunches safely on clinical units?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Every unit break room includes dual full-size staff refrigerators, filtered chilled/boiling water taps, commercial microwaves, and toaster ovens.'
+          },
+          {
+            id: 173,
+            question: 'Are there outdoor walking loops around the campus for a 15-minute break?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'A landscaped 800-meter perimeter Wellness Walk encircles the campus and connects to Trillium Park sports fields and the False Creek Seawall.'
+          },
+          {
+            id: 174,
+            question: 'Will staff discounts at campus food vendors continue?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Tapping your hospital ID badge at campus coffee and dining outlets applies the standard 15% healthcare staff discount.'
+          },
+          {
+            id: 175,
+            question: 'Are there quiet spaces for staff to take personal phone calls or telehealth appointments?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Acoustic privacy phone booths are located adjacent to staff break lounges on every clinical tower floor.'
+          },
+          {
+            id: 176,
+            question: 'How is indoor air quality and thermal comfort maintained across the building?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: '100% fresh outside air intake with MERV-15/HEPA filtration and zone-level humidity/temperature sensors keep clinical areas crisp, odor-free, and comfortable year-round.'
+          },
+          {
+            id: 177,
+            question: 'Are gender-neutral washrooms and change rooms available on all floors?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Universal, single-stall accessible washrooms and inclusive all-gender locker/shower facilities are built on every level.'
+          },
+          {
+            id: 178,
+            question: 'Is there an ATM or banking kiosk on the main concourse?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Multi-bank ATMs and tap-to-pay vending kiosks are located in the main concourse and Level 2 staff hub.'
+          },
+          {
+            id: 179,
+            question: 'How are staff milestones and the legacy Burrard hospital history honored?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'A Heritage & Legacy Wall in the main atrium showcases archival photography, historical artifacts, and donor/staff tributes from over 130 years on Burrard Street.'
+          },
+          {
+            id: 180,
+            question: 'Can staff book rooftop terrace spaces for unit celebrations or retirements?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. The Level 4 Staff Terrace Pavilion can be reserved through the internal room-booking portal for departmental events.'
+          }
+        ]
+      },
+      {
+        id: 'cat10',
+        category: '10. Orientation & Support',
+        shortTitle: 'Orientation',
+        description: 'Mandatory 8-16 hr training, DITL simulations, 24/7 Super-Users, and paid training hours.',
+        faqs: [
+          {
+            id: 181,
+            question: 'Is pre-move orientation mandatory for all physicians, nurses, and staff?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Completing role-specific spatial wayfinding, life-safety fire/code routing, and clinical technology onboarding is mandatory prior to working a shift at 1025 Station St.'
+          },
+          {
+            id: 182,
+            question: 'How many hours of orientation and simulation training will I receive?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Depending on clinical role, staff complete 8 to 16 hours of blended training: 2 hours of self-paced digital modules, a 2-hour guided building tour, and 4–12 hours of hands-on unit simulation.'
+          },
+          {
+            id: 183,
+            question: 'What happens during Day-in-the-Life (DITL) simulations?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Between Nov 2026 and Jan 2027, interdisciplinary teams run full-scale mock shifts inside the new building—testing trauma admissions, Code Blues, OR-to-ICU transfers, and pneumatic tubes.'
+          },
+          {
+            id: 184,
+            question: 'How will I learn how to navigate such a large new hospital before Day 1?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'You get access to a 3D interactive walkthrough app on your phone, color-coded elevator core maps, and small-group "Emergency Route" walking tours led by unit Change Champions.'
+          },
+          {
+            id: 185,
+            question: 'How do I report a workflow flaw or missing equipment during orientation?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Use the Operational Readiness Issue Logger (in the Tools tab of this app) or scan QR posters on the wall to log tickets directly to the Operational Readiness remediation team.'
+          },
+          {
+            id: 186,
+            question: 'Who will be on the floor to help us during the first week of Go-Live?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Every clinical unit is staffed 24/7 with unit-based Super-Users, Biomedical engineers, IT At-the-Elbow analysts, and Logistics Runners for the first 14–30 days.'
+          },
+          {
+            id: 187,
+            question: 'How long will the 24/7 Transition Operations Center (TOC) stay open?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'The TOC operates 24/7 for at least 30 days post-move, holding twice-daily clinical safety huddles to resolve any bottleneck within hours.'
+          },
+          {
+            id: 188,
+            question: 'Are staff and physicians compensated for attending orientation and simulations?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. All unionized staff orientation hours are paid at regular/overtime rates per collective agreements, and medical staff receive funded sessional stipends for mandatory readiness drills.'
+          },
+          {
+            id: 189,
+            question: 'How can I stay updated on weekly readiness milestones leading up to February 2027?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Check the weekly Move Readiness Digest on the intranet, attend bi-weekly virtual Town Halls, or check in with your department’s Change Champion.'
+          },
+          {
+            id: 190,
+            question: 'Who is my unit’s Transition Change Champion and how do I find them?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Every clinical ward, OR pod, and physician division has appointed 2–4 peer Change Champions listed on your unit huddle board and the Relocation Helpdesk directory.'
+          },
+          {
+            id: 191,
+            question: 'What if I am on parental leave, medical leave, or sabbatical during orientation?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Return-to-work onboarding includes a dedicated 1-on-1 spatial tour, badge provisioning, and a super-user buddy shift before you take an independent clinical assignment.'
+          },
+          {
+            id: 192,
+            question: 'Will we test the new clinical smartphones and Smart Alarms before patient arrival?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Sandbox training phones and live telemetry test beds are set up in the Sim Centre and unit huddle rooms starting December 2026.'
+          },
+          {
+            id: 193,
+            question: 'How are fire safety and horizontal evacuation zones practiced before Move Day?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Every unit completes mandatory fire-compartment door drills demonstrating how to move single-room beds horizontally across smoke-barrier zones in under 3 minutes.'
+          },
+          {
+            id: 194,
+            question: 'What happens if a clinical workflow tested during DITL proves too slow?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'DITL simulations exist specifically to catch friction early—over 140 workflow and supply-placement adjustments have already been implemented from early mock drills.'
+          },
+          {
+            id: 195,
+            question: 'Can I bring my personal stethoscope, lead apron, or equipment over early?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes. Labeled personal gear bins are collected by Logistics 5 days pre-move and delivered directly to your assigned new unit locker before Move Day.'
+          },
+          {
+            id: 196,
+            question: 'How do casual and float-pool nurses get oriented across multiple units?',
+            roles: ['Nursing'],
+            answer: 'Float-pool nurses complete a cross-tower orientation module covering standardized room layouts (which are identical across floors) and smart-phone unit sign-in.'
+          },
+          {
+            id: 197,
+            question: 'Will there be a celebratory preview day for staff and their families before opening?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Yes! A Staff & Family Sneak-Peek Weekend is scheduled in January 2027 prior to clinical terminal cleaning, allowing you to show your family your new workplace.'
+          },
+          {
+            id: 198,
+            question: 'How are non-clinical support teams (EVS, Porters, Security, Food Services) integrated into drills?',
+            roles: ['Allied Health', 'Nursing', 'Physicians'],
+            answer: 'Porters, EVS, Security, and Nutrition teams participate alongside doctors and nurses in all DITL simulations to validate RTLS bed-turnover and transport times.'
+          },
+          {
+            id: 199,
+            question: 'What is the Medical Staff Relocation Helpdesk phone number and email?',
+            roles: ['Physicians', 'Residents/Fellows'],
+            answer: 'Call 604-806-2027 (ext. 72027) or email MoveHelpdesk@sph2027.ca—staffed Monday–Friday 07:00–19:00 and 24/7 throughout February 2027.'
+          },
+          {
+            id: 200,
+            question: 'What is the single most important thing I can do right now to feel ready for February 2027?',
+            roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'],
+            answer: 'Book your mandatory spatial orientation & DITL simulation slot early, bookmark your key unit FAQs in this app, and test your new commute route to 1025 Station St ahead of Move Week!'
+          }
+        ]
+      }
+    ];
+
+    const DEFAULT_CHECKLIST = [
+      { id: 'c1', task: 'Complete Online 3D Spatial Wayfinding Module', category: 'Training', roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'] },
+      { id: 'c2', task: 'Attend On-Site Day-in-the-Life (DITL) Simulation', category: 'Training', roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'] },
+      { id: 'c3', task: 'Pair RTLS Staff Badge & Duress Button Profile', category: 'IT & Security', roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'] },
+      { id: 'c4', task: 'Test 6 km Commute via SkyTrain or National Ave Parkade', category: 'Commute', roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'] },
+      { id: 'c5', task: 'Verify Level 4 Quiet Quarters RFID Call Room Access', category: 'Facilities', roles: ['Physicians', 'Residents/Fellows'] },
+      { id: 'c6', task: 'Practice Smart Alarm & Bedside Handoff Workflow', category: 'Workflows', roles: ['Nursing'] },
+      { id: 'c7', task: 'Configure PowerMic & Mobile EHR Dictation Presets', category: 'Clinical', roles: ['Physicians', 'Residents/Fellows'] },
+      { id: 'c8', task: 'Claim Unit Day-Locker & 24/7 Micro-Market Badge Access', category: 'Facilities', roles: ['Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'] }
+    ];
+
+    const ROLES = ['All Roles', 'Physicians', 'Nursing', 'Residents/Fellows', 'Allied Health'];
+
+    // =========================================================================
+    // 2. APPLICATION STATE & STORAGE HELPERS
+    // =========================================================================
+    const state = {
+      activeTab: 'faqs', // 'faqs' | 'checklist' | 'saved' | 'tools'
+      searchQuery: '',
+      selectedRole: 'All Roles',
+      selectedCategory: 'cat1',
+      expandedFaqs: {},
+      darkMode: false,
+      savedFaqIds: [1, 2, 22, 41, 61, 81],
+      checklist: DEFAULT_CHECKLIST.map(item => ({ ...item, completed: false })),
+      commuteMode: 'skytrain',
+      loggedIssues: []
+    };
+
+    function loadPersistedState() {
+      try {
+        const savedTheme = localStorage.getItem('sph2027_theme');
+        if (savedTheme === 'dark') state.darkMode = true;
+
+        const savedIds = localStorage.getItem('sph2027_saved_faqs');
+        if (savedIds) state.savedFaqIds = JSON.parse(savedIds);
+
+        const savedChecklist = localStorage.getItem('sph2027_checklist');
+        if (savedChecklist) state.checklist = JSON.parse(savedChecklist);
+
+        const savedIssues = localStorage.getItem('sph2027_issues');
+        if (savedIssues) state.loggedIssues = JSON.parse(savedIssues);
+      } catch (err) {
+        console.warn('LocalStorage unavailable:', err);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem('sph2027_theme', state.darkMode ? 'dark' : 'light');
+        localStorage.setItem('sph2027_saved_faqs', JSON.stringify(state.savedFaqIds));
+        localStorage.setItem('sph2027_checklist', JSON.stringify(state.checklist));
+        localStorage.setItem('sph2027_issues', JSON.stringify(state.loggedIssues));
+      } catch (err) {
+        console.warn('LocalStorage save failed:', err);
+      }
+    }
+
+    // Flatten 200 FAQs for fast searching & bookmark lookups
+    const ALL_FAQS_FLAT = FAQ_DATA.flatMap(cat =>
+      cat.faqs.map(faq => ({
+        ...faq,
+        catId: cat.id,
+        catName: cat.category,
+        catShort: cat.shortTitle
+      }))
+    );
+
+    let toastTimeout = null;
+    function showToast(msg) {
+      const banner = document.getElementById('toast-banner');
+      const textEl = document.getElementById('toast-message');
+      textEl.textContent = msg;
+      banner.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 2600);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // =========================================================================
+    // 3. RENDER FUNCTIONS
+    // =========================================================================
+    function applyTheme() {
+      const htmlEl = document.documentElement;
+      const iconEl = document.getElementById('icon-theme');
+      if (state.darkMode) {
+        htmlEl.classList.add('dark');
+        iconEl.setAttribute('data-lucide', 'sun');
+      } else {
+        htmlEl.classList.remove('dark');
+        iconEl.setAttribute('data-lucide', 'moon');
+      }
+    }
+
+    function renderRoleButtons() {
+      const grid = document.getElementById('role-buttons-grid');
+      document.getElementById('label-selected-role').textContent = state.selectedRole;
+
+      grid.innerHTML = ROLES.map(role => {
+        const isActive = state.selectedRole === role;
+        return `
+          <button
+            type="button"
+            data-role="${escapeHtml(role)}"
+            class="role-select-btn px-3 py-2.5 rounded-xl text-xs font-bold text-left flex items-center justify-between transition-all ${
+              isActive
+                ? 'bg-teal-400 text-slate-950 shadow-sm'
+                : 'bg-white/10 text-slate-100 hover:bg-white/20'
+            }"
+          >
+            <span>${escapeHtml(role)}</span>
+            ${isActive ? '<i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-slate-950"></i>' : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function getFilteredFaqs() {
+      const q = state.searchQuery.toLowerCase().trim();
+      const roleFiltered = ALL_FAQS_FLAT.filter(faq => {
+        const roleMatch = state.selectedRole === 'All Roles' || faq.roles.includes(state.selectedRole);
+        const searchMatch = !q ||
+          faq.question.toLowerCase().includes(q) ||
+          faq.answer.toLowerCase().includes(q) ||
+          faq.catName.toLowerCase().includes(q) ||
+          ('q' + faq.id) === q ||
+          faq.roles.some(r => r.toLowerCase().includes(q));
+        return roleMatch && searchMatch;
+      });
+
+      const displayed = q
+        ? roleFiltered
+        : roleFiltered.filter(faq => faq.catId === state.selectedCategory);
+
+      return { totalRoleSearchMatches: roleFiltered.length, displayed };
+    }
+
+    function renderFaqsView() {
+      const { totalRoleSearchMatches, displayed } = getFilteredFaqs();
+      const q = state.searchQuery.trim();
+
+      // Update top match badge
+      document.getElementById('badge-match-count').textContent = `${totalRoleSearchMatches} / 200 FAQs`;
+
+      // Toggle clear search button
+      const clearBtn = document.getElementById('btn-clear-search');
+      if (q) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+
+      // Category pills & banner visibility
+      const pillsBar = document.getElementById('category-pills-bar');
+      const catBanner = document.getElementById('category-banner');
+      const searchBar = document.getElementById('search-status-bar');
+
+      if (!q) {
+        pillsBar.classList.remove('hidden');
+        catBanner.classList.remove('hidden');
+        searchBar.classList.add('hidden');
+
+        pillsBar.innerHTML = FAQ_DATA.map(cat => {
+          const isActive = state.selectedCategory === cat.id;
+          const count = cat.faqs.filter(f => state.selectedRole === 'All Roles' || f.roles.includes(state.selectedRole)).length;
+          return `
+            <button
+              type="button"
+              data-cat="${cat.id}"
+              class="cat-pill-btn px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 flex items-center space-x-1.5 ${
+                isActive
+                  ? 'bg-blue-900 dark:bg-teal-500 text-white dark:text-slate-950 shadow-md ring-2 ring-teal-400/50'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
+              }"
+            >
+              <span>${escapeHtml(cat.shortTitle)}</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px] ${
+                isActive
+                  ? 'bg-teal-400 dark:bg-slate-950 text-slate-950 dark:text-teal-300 font-black'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+              }">${count}</span>
+            </button>
+          `;
+        }).join('');
+
+        const activeCatObj = FAQ_DATA.find(c => c.id === state.selectedCategory);
+        if (activeCatObj) {
+          document.getElementById('category-banner-title').textContent = activeCatObj.category;
+          document.getElementById('category-banner-desc').textContent = activeCatObj.description;
+        }
+      } else {
+        pillsBar.classList.add('hidden');
+        catBanner.classList.add('hidden');
+        searchBar.classList.remove('hidden');
+        document.getElementById('search-status-text').innerHTML =
+          `Showing <strong>${displayed.length}</strong> of 200 FAQs for "<strong>${escapeHtml(q)}</strong>"`;
+      }
+
+      // Render FAQ Cards
+      const listContainer = document.getElementById('faq-list-container');
+      if (displayed.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-8 text-center rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 space-y-2.5">
+            <i data-lucide="alert-circle" class="w-8 h-8 text-slate-400 mx-auto"></i>
+            <h3 class="text-sm font-extrabold">No FAQs Matched</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Try searching for "call room", "parking", "Hybrid OR", "RTLS", or "ICU".</p>
+            <button type="button" id="btn-empty-reset" class="px-4 py-2 bg-teal-400 text-slate-950 rounded-xl text-xs font-extrabold mt-2">
+              Reset Search & Role Filter
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = displayed.map(faq => {
+        const isExpanded = !!state.expandedFaqs[faq.id];
+        const isSaved = state.savedFaqIds.includes(faq.id);
+
+        return `
+          <article class="rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-all overflow-hidden ${isExpanded ? 'ring-2 ring-teal-400/50 shadow-md' : 'shadow-sm'}">
+            <div
+              data-faq-toggle="${faq.id}"
+              class="faq-header-area p-3.5 flex items-start justify-between gap-2.5 active:bg-slate-500/5 transition-colors cursor-pointer"
+            >
+              <div class="space-y-1.5 flex-grow min-w-0">
+                <div class="flex items-center flex-wrap gap-1 text-[10px]">
+                  <span class="font-black text-teal-600 dark:text-teal-400">Q${faq.id}</span>
+                  ${q ? `<span class="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded font-bold">${escapeHtml(faq.catShort)}</span>` : ''}
+                  ${faq.roles.map(r => `
+                    <span class="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded font-medium text-[9px]">${escapeHtml(r)}</span>
+                  `).join('')}
+                </div>
+                <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                  ${escapeHtml(faq.question)}
+                </h3>
+              </div>
+
+              <div class="flex items-center space-x-1 shrink-0 pt-0.5">
+                <button
+                  type="button"
+                  data-faq-save="${faq.id}"
+                  class="faq-save-btn p-2.5 rounded-xl transition-colors ${
+                    isSaved ? 'bg-amber-500/15 text-amber-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                  }"
+                  aria-label="${isSaved ? 'Remove bookmark' : 'Bookmark FAQ'}"
+                >
+                  <i data-lucide="${isSaved ? 'bookmark-check' : 'bookmark'}" class="w-4 h-4 ${isSaved ? 'fill-amber-500' : ''}"></i>
+                </button>
+                <div class="p-1 text-slate-400">
+                  <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 ${isExpanded ? 'text-teal-500' : ''}"></i>
+                </div>
+              </div>
+            </div>
+
+            ${isExpanded ? `
+              <div class="px-3.5 pb-4 pt-2.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 text-xs space-y-3">
+                <p class="whitespace-pre-line leading-relaxed text-slate-700 dark:text-slate-300">${escapeHtml(faq.answer)}</p>
+                <div class="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-slate-800 text-[10px] text-slate-400">
+                  <span>SPH 2027 Readiness Guide • ${escapeHtml(faq.catShort)}</span>
+                  <button
+                    type="button"
+                    data-faq-copy="${faq.id}"
+                    class="faq-copy-btn text-teal-600 dark:text-teal-400 font-bold flex items-center space-x-1 hover:underline py-1 px-2 rounded-lg"
+                  >
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                    <span>Copy Q&A</span>
+                  </button>
+                </div>
+              </div>
+            ` : ''}
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderChecklistView() {
+      const completedCount = state.checklist.filter(i => i.completed).length;
+      const pct = Math.round((completedCount / state.checklist.length) * 100);
+
+      document.getElementById('checklist-percent').textContent = `${pct}%`;
+      document.getElementById('checklist-progress-bar').style.width = `${pct}%`;
+
+      const dot = document.getElementById('nav-checklist-dot');
+      if (pct === 100) dot.classList.add('hidden');
+      else dot.classList.remove('hidden');
+
+      const container = document.getElementById('checklist-items-container');
+      container.innerHTML = state.checklist.map(item => `
+        <div
+          data-check-id="${item.id}"
+          class="checklist-row p-3.5 rounded-2xl border transition-all flex items-start space-x-3 active:scale-[0.99] cursor-pointer ${
+            item.completed
+              ? 'bg-emerald-50/90 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-950 dark:text-emerald-200'
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200'
+          }"
+        >
+          <div class="mt-0.5 shrink-0 text-teal-500">
+            <i data-lucide="${item.completed ? 'check-circle-2' : 'circle'}" class="w-5 h-5 ${item.completed ? 'fill-emerald-500 text-white dark:text-slate-950' : 'text-slate-400'}"></i>
+          </div>
+          <div class="space-y-1">
+            <span class="text-xs font-bold block ${item.completed ? 'line-through opacity-75' : ''}">
+              ${escapeHtml(item.task)}
+            </span>
+            <div class="flex items-center flex-wrap gap-1.5 text-[10px] text-slate-400">
+              <span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-bold">${escapeHtml(item.category)}</span>
+              <span>${escapeHtml(item.roles.join(', '))}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderSavedView() {
+      const savedList = ALL_FAQS_FLAT.filter(f => state.savedFaqIds.includes(f.id));
+      document.getElementById('saved-header-title').textContent = `Saved Bookmarks (${savedList.length})`;
+
+      const badge = document.getElementById('nav-saved-badge');
+      if (savedList.length > 0) {
+        badge.classList.remove('hidden');
+        badge.textContent = savedList.length;
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      const container = document.getElementById('saved-list-container');
+      if (savedList.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 space-y-2">
+            <i data-lucide="bookmark" class="w-8 h-8 text-slate-400 mx-auto"></i>
+            <h3 class="text-xs font-extrabold">No Bookmarked Questions Yet</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Tap the bookmark icon on any of the 200 FAQs to pin key protocols for quick shift reference.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = savedList.map(faq => `
+        <article class="p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 space-y-2 shadow-sm">
+          <div class="flex items-start justify-between">
+            <span class="text-[10px] font-extrabold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-md">
+              Q${faq.id} • ${escapeHtml(faq.catShort)}
+            </span>
+            <button type="button" data-faq-save="${faq.id}" class="faq-save-btn text-amber-500 p-1.5 rounded-lg" aria-label="Remove bookmark">
+              <i data-lucide="bookmark-check" class="w-4 h-4 fill-amber-500"></i>
+            </button>
+          </div>
+          <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">${escapeHtml(faq.question)}</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-2.5">
+            ${escapeHtml(faq.answer)}
+          </p>
+        </article>
+      `).join('');
+    }
+
+    function renderToolsView() {
+      // Update active commute button style
+      document.querySelectorAll('.commute-btn').forEach(btn => {
+        const mode = btn.getAttribute('data-mode');
+        if (mode === state.commuteMode) {
+          btn.className = 'commute-btn p-2.5 rounded-xl border text-center transition-all flex flex-col items-center space-y-1 bg-teal-400 text-slate-950 font-extrabold border-teal-400 shadow-sm';
+        } else {
+          btn.className = 'commute-btn p-2.5 rounded-xl border text-center transition-all flex flex-col items-center space-y-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent';
+        }
+      });
+
+      const detailsBox = document.getElementById('commute-details-box');
+      const commuteContent = {
+        skytrain: {
+          title: 'Main Street–Science World Station (Expo Line)',
+          time: '4-minute walk (400m) to Staff Portal',
+          desc: '12 mins from Waterfront Station; 18 mins from Metrotown. Existing 3-Zone Compass AutoLoad passes remain valid with covered pedestrian lighting along Station St.'
+        },
+        driving: {
+          title: 'Underground Parkade (National Avenue Entry)',
+          time: '12–18 min drive from Burrard St (6.0 km)',
+          desc: 'Via Dunsmuir/Prior Viaduct or Pacific Blvd. Reserved P1 Urgent Call stalls sit beside Elevator Core B + 120 Level-2 EV chargers and automated badge gates.'
+        },
+        cycling: {
+          title: 'Subterranean P1 End-of-Trip Bike Hub',
+          time: '18–22 min protected bike ride from Burrard',
+          desc: 'Connects directly to Adanac Bikeway, Central Valley Greenway, and False Creek Seawall. Includes 350+ badge-locked racks, e-bike outlets, repair stand, and 24 private showers.'
+        },
+        shuttle: {
+          title: '90-Day Transitional Staff Express Shuttle',
+          time: 'Every 15 mins during shift changes',
+          desc: 'Free continuous staff shuttle between legacy Burrard St and 1025 Station St running 05:30–09:30 and 14:30–20:30 for the first 90 days post-opening.'
+        }
+      }[state.commuteMode];
+
+      detailsBox.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="font-extrabold text-teal-600 dark:text-teal-400">${escapeHtml(commuteContent.title)}</span>
+        </div>
+        <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200">${escapeHtml(commuteContent.time)}</div>
+        <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">${escapeHtml(commuteContent.desc)}</p>
+      `;
+
+      // Render locally submitted issues
+      const issuesList = document.getElementById('logged-issues-list');
+      if (state.loggedIssues.length === 0) {
+        issuesList.innerHTML = '';
+      } else {
+        issuesList.innerHTML = `
+          <div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider pt-2">Recent Reports Logged (${state.loggedIssues.length})</div>
+          ${state.loggedIssues.slice(0, 3).map(iss => `
+            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-teal-600 dark:text-teal-400">${escapeHtml(iss.category)}</span>
+                <span class="text-[10px] text-slate-400">${escapeHtml(iss.time)}</span>
+              </div>
+              ${iss.unit ? `<div class="text-[10px] font-semibold text-slate-500">Location: ${escapeHtml(iss.unit)}</div>` : ''}
+              <p class="text-slate-700 dark:text-slate-300">${escapeHtml(iss.desc)}</p>
+            </div>
+          `).join('')}
+        `;
+      }
+    }
+
+    function switchTab(navKey) {
+      const targetView = navKey === 'search' ? 'faqs' : navKey;
+      state.activeTab = targetView;
+
+      document.getElementById('view-faqs').classList.toggle('hidden', targetView !== 'faqs');
+      document.getElementById('view-checklist').classList.toggle('hidden', targetView !== 'checklist');
+      document.getElementById('view-saved').classList.toggle('hidden', targetView !== 'saved');
+      document.getElementById('view-tools').classList.toggle('hidden', targetView !== 'tools');
+
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        const btnKey = btn.getAttribute('data-nav');
+        const isCurrent =
+          (navKey === 'search' && btnKey === 'search') ||
+          (navKey !== 'search' && btnKey === targetView);
+
+        if (isCurrent) {
+          btn.classList.add('text-teal-600', 'dark:text-teal-400', 'font-bold');
+          btn.classList.remove('hover:text-slate-900', 'dark:hover:text-white');
+        } else {
+          btn.classList.remove('text-teal-600', 'dark:text-teal-400', 'font-bold');
+          btn.classList.add('hover:text-slate-900', 'dark:hover:text-white');
+        }
+      });
+
+      if (navKey === 'search') {
+        const searchInput = document.getElementById('input-search');
+        searchInput.focus();
+      }
+
+      renderAll();
+    }
+
+    function renderAll() {
+      applyTheme();
+      renderRoleButtons();
+      renderFaqsView();
+      renderChecklistView();
+      renderSavedView();
+      renderToolsView();
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    // =========================================================================
+    // 4. COUNTDOWN TIMER
+    // =========================================================================
+    function updateCountdown() {
+      const target = new Date('2027-02-15T06:00:00');
+      const now = new Date();
+      const diff = target - now;
+      const el = document.getElementById('countdown-display');
+      if (!el) return;
+
+      if (diff <= 0) {
+        el.textContent = '1025 Station St Active!';
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      el.textContent = `${days}d : ${String(hours).padStart(2, '0')}h : ${String(minutes).padStart(2, '0')}m : ${String(seconds).padStart(2, '0')}s`;
+    }
+
+    // =========================================================================
+    // 5. EVENT LISTENERS
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPersistedState();
+      renderAll();
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+
+      // Theme toggle
+      document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+        state.darkMode = !state.darkMode;
+        saveState();
+        renderAll();
+      });
+
+      // Role filter drawer toggle
+      const roleDrawer = document.getElementById('role-drawer');
+      document.getElementById('btn-role-drawer').addEventListener('click', () => {
+        roleDrawer.classList.toggle('hidden');
+      });
+      document.getElementById('btn-close-drawer').addEventListener('click', () => {
+        roleDrawer.classList.add('hidden');
+      });
+
+      // Role selection delegation
+      document.getElementById('role-buttons-grid').addEventListener('click', (e) => {
+        const btn = e.target.closest('.role-select-btn');
+        if (!btn) return;
+        state.selectedRole = btn.getAttribute('data-role');
+        roleDrawer.classList.add('hidden');
+        renderAll();
+      });
+
+      // Live search input
+      const searchInput = document.getElementById('input-search');
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        if (state.activeTab !== 'faqs') {
+          switchTab('faqs');
+        } else {
+          renderFaqsView();
+          if (window.lucide) window.lucide.createIcons();
+        }
+      });
+
+      // Clear search buttons
+      document.getElementById('btn-clear-search').addEventListener('click', () => {
+        state.searchQuery = '';
+        searchInput.value = '';
+        renderAll();
+      });
+
+      document.getElementById('btn-reset-search-inline').addEventListener('click', () => {
+        state.searchQuery = '';
+        searchInput.value = '';
+        renderAll();
+      });
+
+      // Category pills click delegation
+      document.getElementById('category-pills-bar').addEventListener('click', (e) => {
+        const pill = e.target.closest('.cat-pill-btn');
+        if (!pill) return;
+        state.selectedCategory = pill.getAttribute('data-cat');
+        renderAll();
+      });
+
+      // FAQ accordion, bookmark & copy delegation (works across FAQs & Saved tabs)
+      document.body.addEventListener('click', (e) => {
+        // Empty reset button
+        if (e.target.closest('#btn-empty-reset')) {
+          state.searchQuery = '';
+          searchInput.value = '';
+          state.selectedRole = 'All Roles';
+          renderAll();
+          return;
+        }
+
+        // Bookmark button
+        const saveBtn = e.target.closest('.faq-save-btn');
+        if (saveBtn) {
+          e.stopPropagation();
+          const faqId = Number(saveBtn.getAttribute('data-faq-save'));
+          if (state.savedFaqIds.includes(faqId)) {
+            state.savedFaqIds = state.savedFaqIds.filter(id => id !== faqId);
+            showToast(`Removed Q${faqId} from bookmarks`);
+          } else {
+            state.savedFaqIds.push(faqId);
+            showToast(`Saved Q${faqId} to bookmarks`);
+          }
+          saveState();
+          renderAll();
+          return;
+        }
+
+        // Copy button
+        const copyBtn = e.target.closest('.faq-copy-btn');
+        if (copyBtn) {
+          e.stopPropagation();
+          const faqId = Number(copyBtn.getAttribute('data-faq-copy'));
+          const faq = ALL_FAQS_FLAT.find(f => f.id === faqId);
+          if (faq) {
+            const textToCopy = `SPH 2027 Move (Q${faq.id}): ${faq.question}\n\n${faq.answer}`;
+            const tempArea = document.createElement('textarea');
+            tempArea.value = textToCopy;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempArea);
+            showToast(`Copied Q${faq.id} to clipboard`);
+          }
+          return;
+        }
+
+        // Expand/collapse FAQ card
+        const headerArea = e.target.closest('.faq-header-area');
+        if (headerArea) {
+          const faqId = Number(headerArea.getAttribute('data-faq-toggle'));
+          state.expandedFaqs[faqId] = !state.expandedFaqs[faqId];
+          renderFaqsView();
+          if (window.lucide) window.lucide.createIcons();
+          return;
+        }
+
+        // Checklist row toggle
+        const checkRow = e.target.closest('.checklist-row');
+        if (checkRow) {
+          const checkId = checkRow.getAttribute('data-check-id');
+          state.checklist = state.checklist.map(item =>
+            item.id === checkId ? { ...item, completed: !item.completed } : item
+          );
+          saveState();
+          renderChecklistView();
+          if (window.lucide) window.lucide.createIcons();
+        }
+      });
+
+      // Clear all bookmarks
+      document.getElementById('btn-clear-bookmarks').addEventListener('click', () => {
+        state.savedFaqIds = [];
+        saveState();
+        renderAll();
+        showToast('All bookmarks cleared');
+      });
+
+      // Commute mode buttons
+      document.getElementById('commute-mode-buttons').addEventListener('click', (e) => {
+        const btn = e.target.closest('.commute-btn');
+        if (!btn) return;
+        state.commuteMode = btn.getAttribute('data-mode');
+        renderToolsView();
+        if (window.lucide) window.lucide.createIcons();
+      });
+
+      // Issue logger form submission
+      document.getElementById('form-issue-logger').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const catEl = document.getElementById('select-issue-category');
+        const unitEl = document.getElementById('input-issue-unit');
+        const descEl = document.getElementById('textarea-issue-desc');
+
+        const desc = descEl.value.trim();
+        if (!desc) return;
+
+        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        state.loggedIssues.unshift({
+          category: catEl.value,
+          unit: unitEl.value.trim(),
+          desc,
+          time: `Today, ${nowStr}`
+        });
+
+        unitEl.value = '';
+        descEl.value = '';
+        saveState();
+        renderToolsView();
+        if (window.lucide) window.lucide.createIcons();
+        showToast('Discrepancy logged to Transition Operations Center');
+      });
+
+      // Bottom navigation bar
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const navTarget = btn.getAttribute('data-nav');
+          if (navTarget === 'browse') {
+            state.searchQuery = '';
+            searchInput.value = '';
+          }
+          switchTab(navTarget);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
